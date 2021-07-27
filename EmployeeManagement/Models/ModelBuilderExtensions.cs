@@ -26,7 +26,6 @@ namespace EmployeeManagement.Models
                     Email = "John@John.com"
                 }
                 );
-            modelBuilder.Seed();
         }
     }
 }
