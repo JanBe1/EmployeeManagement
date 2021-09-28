@@ -1,5 +1,9 @@
 ﻿@model RegisterViewModel
-
+@{
+    ///<summary>
+    ///Register view: pass data from view to the Account Controller with the POST option
+    ///</summary>
+ }
  @{ 
      ViewBag.Title = "User Registration";
  }
@@ -24,6 +28,10 @@
                 <label asp-for="ConfirmPassword"></label>
                 <input asp-for="ConfirmPassword" class="form-control" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="City"></label>
+                <input asp-for="City" class="form-control" />
             </div>
             <button type="submit" class="btn btn-primary">Register</button>
         </form>

@@ -16,7 +16,7 @@ namespace EmployeeManagement.Controllers
             switch (statusCode) 
             {
                 case 404:
-                    ViewBag.ErrorMessage = "Sorry, the resource you requested could not be found";
+                    ViewBag.ErrorMessage = "Sorry, the resource you have requested could not be found";
                     break;
             }
             return View("NotFound");

@@ -30,12 +30,28 @@ namespace EmployeeManagement
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+            //get user data and role from sql server DbContext
+            services.AddIdentity<ApplicationUser, IdentityRole>(options => //override basic Identity login rules
+            {
+                options.Password.RequiredLength = 5;
+                options.Password.RequiredUniqueChars = 1;
+                options.Password.RequireNonAlphanumeric = false;
+            }).AddEntityFrameworkStores<AppDbContext>();
+
+            //another alternative to override options to Identity login method:
+            //services.Configure<IdentityOptions>(options => 
+            //{
+            //    options.Password.RequiredLength = 10;
+            //    options.Password.RequiredUniqueChars = 3;
+
+            //});
+
             services.AddDbContextPool<AppDbContext>(options => options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));
             services.AddMvc(options => 
             {
-                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
+                //authentication policy - using 
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build(); //authentication of a user is required to do actions in controllers
+                options.Filters.Add(new AuthorizeFilter(policy)); //add a policy
                 options.EnableEndpointRouting = false;
             });
             services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>(); 
@@ -55,6 +71,7 @@ namespace EmployeeManagement
                 app.UseExceptionHandler("/Error");
                 app.UseStatusCodePagesWithRedirects("/Error/{0}");
             }
+            //identity framework authentication added to a pipeline, should be used before mvc middleware
             app.UseAuthentication();
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();

@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.ViewModels;
+﻿using EmployeeManagement.Models;
+using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,10 @@ namespace EmployeeManagement.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
 
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -44,6 +45,7 @@ namespace EmployeeManagement.Controllers
                 var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
+                    //return user to an action he last did via returnUrl, eg. you tried to register a user -> you log in -> you go back to register view, not a home one
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))//prevents open redirect vulnerability
                     {
                         return Redirect(returnUrl); //i can also use localredirect
@@ -63,7 +65,7 @@ namespace EmployeeManagement.Controllers
 
         [AcceptVerbs("Get", "Post")]
         [AllowAnonymous]
-        public async Task<IActionResult> IsEmailInUse(string email) 
+        public async Task<IActionResult> IsEmailInUse(string email) //remote validation
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user == null) 
@@ -91,20 +93,35 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-                var result = await userManager.CreateAsync(user, model.Password);
+                var user = new ApplicationUser 
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    City = model.City
+                }; //get user from form and the model from viewmodel
+                var result = await userManager.CreateAsync(user, model.Password); //create user with the password
 
                 if (result.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("index", "home");
+                    if(signInManager.IsSignedIn(User) && User.IsInRole("Administrator"))
+                    {
+                        return RedirectToAction("ListUsers", "Administration");
+                    }
+                    await signInManager.SignInAsync(user, isPersistent: false); //login registered user without session cookies
+                    return RedirectToAction("index", "home"); //get user back to home view
                 }
-                foreach (var error in result.Errors) 
+                foreach (var error in result.Errors) //show all errors
                 {
                     ModelState.AddModelError("", error.Description);
                 }
             }
             return View(model);
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied() 
+        {
+            return View("AccessDenied");
         }
     }
 }

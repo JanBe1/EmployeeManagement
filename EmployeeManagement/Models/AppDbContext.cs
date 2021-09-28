@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EmployeeManagement.Models
 {
-    public class AppDbContext : IdentityDbContext 
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) :base( options)
         {
@@ -16,7 +16,9 @@ namespace EmployeeManagement.Models
         public DbSet<Employee> Employees { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //avoid Package-Manager Error to create AddingIdentity package to our DbContext (identity framework)
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.Seed();
         }
     }
