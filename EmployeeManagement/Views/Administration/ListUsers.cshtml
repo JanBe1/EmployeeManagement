@@ -4,22 +4,29 @@
 @{
     ViewBag.Title = "All Users";
 }
-
+<h1>All Users</h1>
+<a asp-action="register" asp-controller="account" class="btn btn-primary" style="width:auto">Create new user</a>
 @if (Model.Any())
 {
     foreach (var user in Model)
     {
 
+        
+
         <div class="card mb-3">
             <div class="card-header">
-                <h5>@user.UserName</h5>
+                <span>User Id: @user.Id</span>
             </div>
             <div class="card-body">
-                <h6 class="card-title">City</h6>
+                <h6 class="card-title">Email:</h6>
+                <span> @user.Email</span>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">City:</h6>
                 <span> @user.City</span>
             </div>
             <div class="card-footer">
-                <a href="#" class="btn btn-primary">Edit</a>
+                <a asp-action="EditUser" asp-controller="Administration" asp-route-id="@user.Id" class="btn btn-primary">Edit</a>
                 <a href="#" class="btn btn-danger">Delete</a>
             </div>
         </div>
